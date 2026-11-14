@@ -128,15 +128,7 @@ fetch('https://qtei-backend.onrender.com/api/...')
     }
   };
 
-  const handleSimulateTutorMagicLink = () => {
-    const code = localStorage.getItem('qtei_tutor_code') || 'TUTOR-AM-101';
-    const found = courses.find(c => c.tutorCode === code) || courses[0];
-    setTutorData({ name: found.tutor, assignedCourse: found.name, code: found.tutorCode });
-    setTutorLoggedIn(true);
-    setTutorMagicLinkSent(false);
-  };
-
- // --- ADMIN ACTIONS (Connected to PostgreSQL Backend) ---
+  // --- ADMIN ACTIONS (Connected to PostgreSQL Backend) ---
   const handleCreateStudent = async (e) => {
     e.preventDefault();
     if (!newStudentName.trim() || !newStudentEmail.trim()) return;
@@ -158,72 +150,6 @@ fetch('https://qtei-backend.onrender.com/api/...')
       setNewStudentName('');
       setNewStudentEmail('');
       setTimeout(() => setSuccessMsg(''), 6000);
-    } catch (err) {
-      alert('Error saving student to backend server.');
-    }
-  };
-
-  const handleCreateTutor = (e) => {
-    e.preventDefault();
-    if (!newTutorName.trim() || !newTutorCourseName.trim()) return;
-    const randomTutorCode = `TUTOR-${newTutorName.substring(0, 2).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
-    const newCourseObj = {
-      id: Date.now(),
-      name: newTutorCourseName,
-      tutor: newTutorName,
-      tutorCode: randomTutorCode,
-      type: 'Tech'
-    };
-    setCourses([...courses, newCourseObj]);
-    setSuccessMsg(`Instructor ${newTutorName} created successfully! Access Code: ${randomTutorCode}`);
-    setNewTutorName('');
-    setNewTutorCourseName('');
-    setTimeout(() => setSuccessMsg(''), 6000);
-  };
-    } catch (err) {
-      alert('Error saving student to backend server.');
-    }
-  };
-
-  const handleCreateTutor = (e) => {
-    e.preventDefault();
-    if (!newTutorName.trim() || !newTutorCourseName.trim()) return;
-    const randomTutorCode = `TUTOR-${newTutorName.substring(0, 2).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
-    const newCourseObj = {
-      id: Date.now(),
-      name: newTutorCourseName,
-      tutor: newTutorName,
-      tutorCode: randomTutorCode,
-      type: 'Tech'
-    };
-    setCourses([...courses, newCourseObj]);
-    setSuccessMsg(`Instructor ${newTutorName} created successfully! Access Code: ${randomTutorCode}`);
-    setNewTutorName('');
-    setNewTutorCourseName('');
-    setTimeout(() => setSuccessMsg(''), 6000);
-  };
-    } catch (err) {
-      alert('Error saving student to backend server.');
-    }
-  };
-
-  const handleCreateTutor = (e) => {
-    e.preventDefault();
-    if (!newTutorName.trim() || !newTutorCourseName.trim()) return;
-    const randomTutorCode = `TUTOR-${newTutorName.substring(0, 2).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
-    const newCourseObj = {
-      id: Date.now(),
-      name: newTutorCourseName,
-      tutor: newTutorName,
-      tutorCode: randomTutorCode,
-      type: 'Tech'
-    };
-    setCourses([...courses, newCourseObj]);
-    setSuccessMsg(`Instructor ${newTutorName} created successfully! Access Code: ${randomTutorCode}`);
-    setNewTutorName('');
-    setNewTutorCourseName('');
-    setTimeout(() => setSuccessMsg(''), 6000);
-  };
     } catch (err) {
       alert('Error saving student to backend server.');
     }
