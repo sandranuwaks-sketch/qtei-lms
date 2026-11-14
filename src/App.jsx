@@ -202,6 +202,28 @@ fetch('https://qtei-backend.onrender.com/api/...')
     setNewTutorCourseName('');
     setTimeout(() => setSuccessMsg(''), 6000);
   };
+    } catch (err) {
+      alert('Error saving student to backend server.');
+    }
+  };
+
+  const handleCreateTutor = (e) => {
+    e.preventDefault();
+    if (!newTutorName.trim() || !newTutorCourseName.trim()) return;
+    const randomTutorCode = `TUTOR-${newTutorName.substring(0, 2).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
+    const newCourseObj = {
+      id: Date.now(),
+      name: newTutorCourseName,
+      tutor: newTutorName,
+      tutorCode: randomTutorCode,
+      type: 'Tech'
+    };
+    setCourses([...courses, newCourseObj]);
+    setSuccessMsg(`Instructor ${newTutorName} created successfully! Access Code: ${randomTutorCode}`);
+    setNewTutorName('');
+    setNewTutorCourseName('');
+    setTimeout(() => setSuccessMsg(''), 6000);
+  };
 
   const handleRequestNewClass = (e) => {
     e.preventDefault();
