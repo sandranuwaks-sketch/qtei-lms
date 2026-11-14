@@ -1,1 +1,17 @@
 @import "tailwindcss";
+/* In your index.css or main stylesheet */
+:root {
+  --bg-canvas: #0B0D17;
+  --bg-card: #131626;
+  --text-primary: #FFFFFF;
+  --text-muted: #94A3B8;
+  --border-subtle: #232742;
+}
+
+.light-theme {
+  --bg-canvas: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --text-primary: #0F172A;
+  --text-muted: #64748B;
+  --border-subtle: #E2E8F0;
+}

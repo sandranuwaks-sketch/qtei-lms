@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
+React.useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.remove('light-theme');
+    } else {
+      document.documentElement.classList.add('light-theme');
+    }
+  }, [isDarkMode]);
 
 export default function App() {
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [currentView, setCurrentView] = useState('select-role');
 
   // --- ANNOUNCEMENT BROADCAST STATE ---
@@ -245,6 +253,12 @@ fetch('https://qtei-backend.onrender.com/api/...')
             </div>
           </div>
         )}
+        <button 
+  onClick={() => setIsDarkMode(!isDarkMode)}
+  className="px-3 py-1.5 rounded-lg bg-gray-800 text-white text-xs font-medium hover:bg-gray-700 transition"
+>
+  {isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+</button>
 
         {/* ================= STUDENT PORTAL ================= */}
         {currentView === 'student-portal' && (
