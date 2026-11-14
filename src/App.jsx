@@ -11,8 +11,6 @@ export default function App() {
       document.documentElement.classList.add('light-theme');
     }
   }, [isDarkMode]);
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [currentView, setCurrentView] = useState('select-role');
 
   // --- ANNOUNCEMENT BROADCAST STATE ---
   const [announcement, setAnnouncement] = useState('🔔 QTEI Notice: Cohort 2 Orientation begins Monday at 10:00 AM WAT. Ensure your Human Rights module is reviewed.');
@@ -236,12 +234,11 @@ fetch('https://qtei-backend.onrender.com/api/...')
           <button onClick={() => setCurrentView('select-role')} className={`text-xs px-3.5 py-2 rounded-xl font-medium transition-all ${currentView === 'select-role' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>Home</button>
           <button onClick={() => setCurrentView('student-portal')} className={`text-xs px-3.5 py-2 rounded-xl font-medium transition-all ${currentView === 'student-portal' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>Student Portal</button>
           <button onClick={() => setCurrentView('tutor-portal')} className={`text-xs px-3.5 py-2 rounded-xl font-medium transition-all ${currentView === 'tutor-portal' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>Tutor Portal</button>
-          <button onClick={() => setCurrentView('admin-dashboard')} className={`text-xs px-3.5 py-2 rounded-xl font-medium transition-all ${currentView === 'admin-dashboard' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>Admin Center</button>
-             <button 
+          <button onClick={() => setCurrentView('admin-dashboard')} className={`text-xs px-3.5 py-2 rounded-xl font-medium transition-all ${currentView === 'admin-dashboard' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>Admin Center</button><button 
   onClick={() => setIsDarkMode(!isDarkMode)}
-  className="px-3 py-1.5 rounded-lg bg-gray-800 text-white text-xs font-medium hover:bg-gray-700 transition"
+  className="text-xs px-3.5 py-2 rounded-xl font-medium bg-slate-800 text-slate-200 hover:bg-slate-700 transition-all"
 >
-  {isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+  {isDarkMode ? '☀️ Light' : '🌙 Dark'}
 </button>
         </div>
       </header>
