@@ -3,13 +3,14 @@ import React, { useState, useEffect } from 'react';
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [currentView, setCurrentView] = useState('select-role');
+
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.remove('light-theme');
     } else {
       document.documentElement.classList.add('light-theme');
     }
-  }, [isDarkMode]);) {
+  }, [isDarkMode]);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [currentView, setCurrentView] = useState('select-role');
 
