@@ -137,11 +137,11 @@ fetch('https://qtei-backend.onrender.com/api/...')
   };
 
   // --- ADMIN ACTIONS (Connected to PostgreSQL Backend) ---
+ // --- ADMIN ACTIONS (Connected to PostgreSQL Backend) ---
   const handleCreateStudent = async (e) => {
     e.preventDefault();
     if (!newStudentName.trim() || !newStudentEmail.trim()) return;
     const randomCode = `QTEI-${newStudentCourse.substring(0, 2).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
-    
     try {
       const response = await fetch('http://localhost:5000/api/students', {
         method: 'POST',
