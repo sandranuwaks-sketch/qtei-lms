@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
-
-export default function App(import React, { useState, useEffect } from 'react';
-
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [currentView, setCurrentView] = useState('select-role');
-
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.remove('light-theme');
