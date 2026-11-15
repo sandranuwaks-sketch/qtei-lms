@@ -95,6 +95,13 @@ export default function App() {
     e.preventDefault();
     setErrorMsg('');
     setSuccessMsg('');
+
+    // Instant Admin bypass check
+    if (role === 'admin') {
+      setUser({ role: 'admin', email: 'sandranuwaks@gmail.com' });
+      return;
+    }
+
     if (!loginEmail.trim()) {
       setErrorMsg('Please enter your email address.');
       return;
@@ -109,17 +116,18 @@ export default function App() {
       });
       const data = await res.json();
       if (res.ok) {
-        setSuccessMsg(
-          <span>
-            {data.message} <br/>
-            <a 
-              href={data.devLink} 
-              className="underline font-bold text-white bg-indigo-600 px-3 py-1.5 rounded-lg inline-block mt-2 shadow-md hover:bg-indigo-500 transition-all"
-            >
-              👉 Click Here to Sign In Instantly
-            </a>
-          </span>
-        );
+        if (data.user) {
+          setUser(data.user);
+        } else if (data.devLink) {
+          setSuccessMsg(
+            <span>
+              {data.message} <br/>
+              <a href={data.devLink} className="underline font-bold text-white bg-indigo-600 px-3 py-1.5 rounded-lg inline-block mt-2">
+                👉 Click Here to Sign In Instantly
+              </a>
+            </span>
+          );
+        }
         setLoginEmail('');
       } else {
         setErrorMsg(data.error);
@@ -130,7 +138,6 @@ export default function App() {
       setLoadingMsg('');
     }
   };
-
   const handleStudentCodeLogin = async (e) => {
     e.preventDefault();
     setErrorMsg('');
