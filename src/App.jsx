@@ -154,7 +154,6 @@ fetch('https://qtei-backend.onrender.com/api/...')
       alert('Error saving student to backend server.');
     }
   };
-
   const handleCreateTutor = (e) => {
     e.preventDefault();
     if (!newTutorName.trim() || !newTutorCourseName.trim()) return;
