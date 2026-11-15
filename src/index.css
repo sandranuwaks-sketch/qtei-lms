@@ -15,3 +15,31 @@
   --text-muted: #64748B;
   --border-subtle: #E2E8F0;
 }
+/* Light Theme Override Styles */
+html.light-theme {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html.light-theme div[class*="bg-slate-900"],
+html.light-theme div[class*="bg-slate-950"] {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+html.light-theme .text-slate-100,
+html.light-theme .text-white {
+  color: #0f172a !important;
+}
+
+html.light-theme .text-slate-400 {
+  color: #64748b !important;
+}
+
+html.light-theme input,
+html.light-theme select {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
