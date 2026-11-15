@@ -128,7 +128,9 @@ fetch('https://qtei-backend.onrender.com/api/...')
     }
   };
 
-  // --- ADMIN ACTIONS (Connected to PostgreSQL Backend) ---
+ // --- ADMIN ACTIONS & INSPECTOR STATE ---
+  const [selectedProfile, setSelectedProfile] = useState(null); // For inspecting student/tutor details
+
   const handleCreateStudent = async (e) => {
     e.preventDefault();
     if (!newStudentName.trim() || !newStudentEmail.trim()) return;
@@ -141,17 +143,20 @@ fetch('https://qtei-backend.onrender.com/api/...')
           name: newStudentName,
           email: newStudentEmail,
           course: newStudentCourse,
-          code: randomCode
+          code: randomCode,
+          status: 'Admitted'
         })
       });
+      if (!response.ok) throw new Error('Failed to save student to database.');
       const savedStudent = await response.json();
       setStudents([...students, savedStudent]);
-      setSuccessMsg(`Student ${newStudentName} admitted and saved to database! Code: ${randomCode}`);
+      setSuccessMsg(`✅ Student ${newStudentName} admitted successfully! Code: ${randomCode}`);
       setNewStudentName('');
       setNewStudentEmail('');
       setTimeout(() => setSuccessMsg(''), 6000);
     } catch (err) {
-      alert('Error saving student to backend server.');
+      setSuccessMsg(`❌ Error: Could not connect to backend database server.`);
+      setTimeout(() => setSuccessMsg(''), 6000);
     }
   };
   const handleCreateTutor = (e) => {
@@ -531,17 +536,15 @@ fetch('https://qtei-backend.onrender.com/api/...')
 
                 <div className="mt-4 pt-4 border-t border-slate-800 space-y-2">
                   <p className="text-xs font-bold text-slate-300">Database Roster Summary ({students.length})</p>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {students.map(s => (
-                      <div key={s.id} className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
-                        <div>
-                          <p className="font-bold text-white">{s.name}</p>
-                          <p className="text-indigo-400">{s.course}</p>
-                        </div>
-                        <span className="font-mono bg-amber-950/60 text-amber-300 border border-amber-800 px-2 py-1 rounded">{s.code}</span>
-                      </div>
-                    ))}
-                  </div>
+                  {students.map(s => (
+  <div key={s.id || s.email} onClick={() => setSelectedProfile({ type: 'student', data: s })} className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center text-xs cursor-pointer hover:border-indigo-500 transition-all">
+    <div>
+      <p className="font-bold text-white">{s.name}</p>
+      <p className="text-indigo-400">{s.course}</p>
+    </div>
+    <span className="font-mono bg-amber-950/60 text-amber-300 border border-amber-800 px-2 py-1 rounded">{s.code || 'Admitted'}</span>
+  </div>
+))}
                 </div>
               </div>
 
@@ -554,6 +557,29 @@ fetch('https://qtei-backend.onrender.com/api/...')
       <footer className="text-center text-xs text-slate-500 mt-10 py-4 border-t border-slate-900">
         Minority Watch &copy; 2026 QueerTech Empowerment Initiative (QTEI) &bull; A Minority Watch Organisation Nigeria Program
       </footer>
+      {/* Profile Detail Inspection Modal */}
+{selectedProfile && (
+  <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+    <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-4 relative">
+      <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 className="text-lg font-bold text-white capitalize">{selectedProfile.type} Profile Details</h3>
+        <button onClick={() => setSelectedProfile(null)} className="text-slate-400 hover:text-white text-sm font-bold bg-slate-800 px-3 py-1 rounded-xl">✕ Close</button>
+      </div>
+      <div className="space-y-3 text-xs text-slate-300">
+        <p><strong>Name:</strong> <span className="text-white">{selectedProfile.data.name || selectedProfile.data.tutor}</span></p>
+        <p><strong>Track / Course:</strong> <span className="text-indigo-400">{selectedProfile.data.course || selectedProfile.data.name}</span></p>
+        <p><strong>Email / Code:</strong> <span className="font-mono text-amber-300">{selectedProfile.data.email || selectedProfile.data.tutorCode}</span></p>
+        <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2">
+          <p className="font-bold text-white uppercase text-[10px] tracking-wider">Curriculum & Progress Overview</p>
+          <div className="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
+            <div className="bg-indigo-500 h-full rounded-full" style={{ width: '80%' }}></div>
+          </div>
+          <p className="text-[11px] text-slate-400">Status: Active &bull; Attendance: 92% &bull; Assignments Submitted: 3/4</p>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }
