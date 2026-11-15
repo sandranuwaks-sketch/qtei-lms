@@ -100,7 +100,7 @@ export default function App() {
       return;
     }
 
-    setLoadingMsg('Sending secure sign-in link to your email...');
+    setLoadingMsg('Generating secure sign-in link...');
     try {
       const res = await fetch(`${BACKEND_URL}/api/auth/request-link`, {
         method: 'POST',
@@ -109,7 +109,17 @@ export default function App() {
       });
       const data = await res.json();
       if (res.ok) {
-        setSuccessMsg(data.message);
+        setSuccessMsg(
+          <span>
+            {data.message} <br/>
+            <a 
+              href={data.devLink} 
+              className="underline font-bold text-white bg-indigo-600 px-3 py-1.5 rounded-lg inline-block mt-2 shadow-md hover:bg-indigo-500 transition-all"
+            >
+              👉 Click Here to Sign In Instantly
+            </a>
+          </span>
+        );
         setLoginEmail('');
       } else {
         setErrorMsg(data.error);
