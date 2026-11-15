@@ -128,9 +128,7 @@ fetch('https://qtei-backend.onrender.com/api/...')
     }
   };
 
- // --- ADMIN ACTIONS & INSPECTOR STATE ---
-  const [selectedProfile, setSelectedProfile] = useState(null); // For inspecting student/tutor details
-
+// --- ADMIN ACTIONS (Connected to PostgreSQL Backend) ---
   const handleCreateStudent = async (e) => {
     e.preventDefault();
     if (!newStudentName.trim() || !newStudentEmail.trim()) return;
@@ -143,22 +141,20 @@ fetch('https://qtei-backend.onrender.com/api/...')
           name: newStudentName,
           email: newStudentEmail,
           course: newStudentCourse,
-          code: randomCode,
-          status: 'Admitted'
+          code: randomCode
         })
       });
-      if (!response.ok) throw new Error('Failed to save student to database.');
       const savedStudent = await response.json();
       setStudents([...students, savedStudent]);
-      setSuccessMsg(`✅ Student ${newStudentName} admitted successfully! Code: ${randomCode}`);
+      setSuccessMsg(`Student ${newStudentName} admitted and saved to database! Code: ${randomCode}`);
       setNewStudentName('');
       setNewStudentEmail('');
       setTimeout(() => setSuccessMsg(''), 6000);
     } catch (err) {
-      setSuccessMsg(`❌ Error: Could not connect to backend database server.`);
-      setTimeout(() => setSuccessMsg(''), 6000);
+      alert('Error saving student to backend server.');
     }
   };
+
   const handleCreateTutor = (e) => {
     e.preventDefault();
     if (!newTutorName.trim() || !newTutorCourseName.trim()) return;
