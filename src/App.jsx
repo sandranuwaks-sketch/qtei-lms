@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from 'react';
 
 export default function App() {
+  export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [currentView, setCurrentView] = useState('select-role');
+  const [students, setStudents] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [newStudentName, setNewStudentName] = useState('');
+  const [newStudentEmail, setNewStudentEmail] = useState('');
+  const [newStudentCourse, setNewStudentCourse] = useState('Software Engineering');
+  const [newTutorName, setNewTutorName] = useState('');
+  const [newTutorCourseName, setNewTutorCourseName] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const [selectedProfile, setSelectedProfile] = useState(null);
 
   useEffect(() => {
     if (isDarkMode) {
