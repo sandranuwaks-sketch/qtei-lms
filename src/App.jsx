@@ -9,11 +9,11 @@ export default function App() {
   const [tutors, setTutors] = useState([]);
   const [students, setStudents] = useState([]);
   const [timetableRequests, setTimetableRequests] = useState([]);
-  
+
   // Navigation States
-  const [adminView, setAdminView] = useState('hub'); 
-  const [authView, setAuthView] = useState('select'); 
-  
+  const [adminView, setAdminView] = useState('hub');
+  const [authView, setAuthView] = useState('select');
+
   // Sidebar & Modal States
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null); // 'teach', 'learn', 'request-course', 'info'
@@ -75,9 +75,9 @@ export default function App() {
         setTeacherApps(data.teacherApps || []);
         setStudentApps(data.studentApps || []);
         setCourseReqs(data.courseReqs || []);
-        if (data.courses.length > 0) {
-          if (!newTutorCourseId) setNewTutorCourseId(data.courses[0].id);
-          if (!newStudentCourseId) setNewStudentCourseId(data.courses[0].id);
+        if (data.courses && data.courses.length > 0) {
+          setNewTutorCourseId(prev => prev || data.courses[0].id);
+          setNewStudentCourseId(prev => prev || data.courses[0].id);
         }
       }
     } catch (err) {
@@ -118,7 +118,10 @@ export default function App() {
       if (res.ok) {
         setSuccessMsg('✅ Application submitted successfully! Admin will review your credentials.');
         setActiveModal(null);
-        setTeachName(''); setTeachEmail(''); setTeachExpertise(''); setTeachBio('');
+        setTeachName('');
+        setTeachEmail('');
+        setTeachExpertise('');
+        setTeachBio('');
       }
     } catch (err) {
       setErrorMsg('Failed to submit application.');
@@ -136,7 +139,10 @@ export default function App() {
       if (res.ok) {
         setSuccessMsg('✅ Learning application submitted successfully! We will be in touch soon.');
         setActiveModal(null);
-        setLearnName(''); setLearnEmail(''); setLearnTrack(''); setLearnMotivation('');
+        setLearnName('');
+        setLearnEmail('');
+        setLearnTrack('');
+        setLearnMotivation('');
       }
     } catch (err) {
       setErrorMsg('Failed to submit application.');
@@ -154,7 +160,9 @@ export default function App() {
       if (res.ok) {
         setSuccessMsg('✅ Course request submitted to curriculum team!');
         setActiveModal(null);
-        setReqTitle(''); setReqDesc(''); setReqBy('');
+        setReqTitle('');
+        setReqDesc('');
+        setReqBy('');
       }
     } catch (err) {
       setErrorMsg('Failed to submit course request.');
@@ -163,9 +171,16 @@ export default function App() {
 
   const handleRequestMagicLink = async (e, role) => {
     e.preventDefault();
-    setErrorMsg(''); setSuccessMsg('');
-    if (role === 'admin') { setUser({ role: 'admin', email: 'sandranuwaks@gmail.com' }); return; }
-    if (!loginEmail.trim()) { setErrorMsg('Please enter your email.'); return; }
+    setErrorMsg('');
+    setSuccessMsg('');
+    if (role === 'admin') {
+      setUser({ role: 'admin', email: 'sandranuwaks@gmail.com' });
+      return;
+    }
+    if (!loginEmail.trim()) {
+      setErrorMsg('Please enter your email.');
+      return;
+    }
     setLoadingMsg('Generating sign-in link...');
     try {
       const res = await fetch(`${BACKEND_URL}/api/auth/request-link`, {
@@ -176,14 +191,21 @@ export default function App() {
       const data = await res.json();
       if (res.ok && data.devLink) {
         setSuccessMsg(
-          <span>{data.message} <br/>
+          <span>
+            {data.message} <br />
             <a href={data.devLink} className="underline font-bold text-white bg-indigo-600 px-3 py-1 rounded-lg inline-block mt-2">
               👉 Click Here to Sign In
             </a>
           </span>
         );
-      } else { setErrorMsg(data.error); }
-    } catch (err) { setErrorMsg('Network error.'); } finally { setLoadingMsg(''); }
+      } else {
+        setErrorMsg(data.error);
+      }
+    } catch (err) {
+      setErrorMsg('Network error.');
+    } finally {
+      setLoadingMsg('');
+    }
   };
 
   const handleStudentCodeLogin = async (e) => {
@@ -195,8 +217,15 @@ export default function App() {
         body: JSON.stringify({ code: loginCode })
       });
       const data = await res.json();
-      if (res.ok) { setUser(data.user); setLoginCode(''); } else { setErrorMsg(data.error); }
-    } catch (err) { setErrorMsg('Network error.'); }
+      if (res.ok) {
+        setUser(data.user);
+        setLoginCode('');
+      } else {
+        setErrorMsg(data.error);
+      }
+    } catch (err) {
+      setErrorMsg('Network error.');
+    }
   };
 
   const handleCreateCourse = async (e) => {
@@ -211,21 +240,22 @@ export default function App() {
       if (res.ok) {
         setCourses([...courses, data]);
         setSuccessMsg(`✅ Course "${data.name}" created!`);
-        setNewCourseName(''); fetchAllData();
+        setNewCourseName('');
+        fetchAllData();
       }
-    } catch (err) { setErrorMsg('Failed.'); }
+    } catch (err) {
+      setErrorMsg('Failed.');
+    }
   };
 
   const handleCreateTutor = async (e) => {
     e.preventDefault();
     setErrorMsg('');
     setSuccessMsg('');
-
     if (!newTutorCourseId) {
       setErrorMsg('Please create a course first or select a valid course.');
       return;
     }
-
     setLoadingMsg('Assigning tutor and dispatching welcome link...');
     try {
       const res = await fetch(`${BACKEND_URL}/api/tutors`, {
@@ -237,35 +267,40 @@ export default function App() {
           courseId: Number(newTutorCourseId)
         })
       });
-
       const data = await res.json();
-
       if (res.ok) {
         setSuccessMsg(`✅ Tutor "${data.name}" assigned to ${data.course_name}! Access Code: ${data.tempCode}`);
         setNewTutorName('');
         setNewTutorEmail('');
         await fetchAllData();
-        setAdminView('hub'); // Automatically return to Admin Hub on success
+        setAdminView('hub');
       } else {
         setErrorMsg(`❌ Error: ${data.error || 'Could not assign tutor. Check if email already exists.'}`);
       }
     } catch (err) {
-      setErrorMsg(`❌ Network error: Backend may be waking up from sleep. Please wait 30 seconds and try again.`);
+      setErrorMsg('❌ Network error: Backend may be waking up from sleep. Please wait 30 seconds and try again.');
     } finally {
       setLoadingMsg('');
     }
   };
-  
+
   const handleCreateStudent = async (e) => {
     e.preventDefault();
     try {
       const res = await fetch(`${BACKEND_URL}/api/students`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newStudentName, email: newStudentEmail, courseId: newStudentCourseId })
+        body: JSON.stringify({ name: newStudentName, email: newStudentEmail, courseId: Number(newStudentCourseId) })
       });
-      if (res.ok) { setSuccessMsg('✅ Student admitted successfully!'); setNewStudentName(''); setNewStudentEmail(''); fetchAllData(); }
-    } catch (err) { setErrorMsg('Failed.'); }
+      if (res.ok) {
+        setSuccessMsg('✅ Student admitted successfully!');
+        setNewStudentName('');
+        setNewStudentEmail('');
+        fetchAllData();
+      }
+    } catch (err) {
+      setErrorMsg('Failed.');
+    }
   };
 
   const handleUpdateStudentProfile = async (e) => {
@@ -277,8 +312,13 @@ export default function App() {
         body: JSON.stringify({ bio: editBio, phone: editPhone })
       });
       const data = await res.json();
-      if (res.ok) { setUser({ ...user, bio: data.bio, phone: data.phone }); setSuccessMsg('✅ Profile updated!'); }
-    } catch (err) { setErrorMsg('Failed.'); }
+      if (res.ok) {
+        setUser({ ...user, bio: data.bio, phone: data.phone });
+        setSuccessMsg('✅ Profile updated!');
+      }
+    } catch (err) {
+      setErrorMsg('Failed.');
+    }
   };
 
   const handleProposeTimetable = async (e) => {
@@ -289,26 +329,37 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ courseId: user.course_id, tutorName: user.name, proposedTimetable })
       });
-      if (res.ok) { setSuccessMsg('✅ Timetable proposal submitted to Admin!'); setProposedTimetable(''); fetchAllData(); }
-    } catch (err) { setErrorMsg('Failed.'); }
+      if (res.ok) {
+        setSuccessMsg('✅ Timetable proposal submitted to Admin!');
+        setProposedTimetable('');
+        fetchAllData();
+      }
+    } catch (err) {
+      setErrorMsg('Failed.');
+    }
   };
 
   const handleApproveTimetable = async (requestId) => {
     try {
       const res = await fetch(`${BACKEND_URL}/api/timetable/approve/${requestId}`, { method: 'POST' });
-      if (res.ok) { setSuccessMsg('✅ Approved!'); fetchAllData(); }
-    } catch (err) { setErrorMsg('Failed.'); }
+      if (res.ok) {
+        setSuccessMsg('✅ Approved!');
+        fetchAllData();
+      }
+    } catch (err) {
+      setErrorMsg('Failed.');
+    }
   };
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} p-6 transition-colors duration-300 font-sans relative`}>
-      
-      {/* Header Bar with Home & Contextual Menu Button */}
+      {/* Header Bar */}
       <header className="flex justify-between items-center max-w-6xl mx-auto border-b border-slate-800 pb-4 mb-6">
         <div className="flex items-center gap-4">
-          <button 
-            onClick={() => { setUser(null); setAuthView('select'); setAdminView('hub'); }} 
-            className="text-xs font-bold px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1 shadow-md transition-all">
+          <button
+            onClick={() => { setUser(null); setAuthView('select'); setAdminView('hub'); }}
+            className="text-xs font-bold px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1 shadow-md transition-all"
+          >
             🏠 Home
           </button>
           <div className="cursor-pointer" onClick={() => { setUser(null); setAuthView('select'); setAdminView('hub'); }}>
@@ -336,7 +387,7 @@ export default function App() {
       {/* Contextual Sidebar Drawer */}
       {isSidebarOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
-          <div className="w-80 bg-slate-900 border-l border-slate-800 p-6 space-y-6 shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300">
+          <div className="w-80 bg-slate-900 border-l border-slate-800 p-6 space-y-6 shadow-2xl flex flex-col justify-between">
             <div className="space-y-6">
               <div className="flex justify-between items-center border-b border-slate-800 pb-4">
                 <h3 className="font-bold text-white text-sm">⚡ QTEI Quick Actions</h3>
@@ -369,7 +420,7 @@ export default function App() {
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-8 rounded-3xl space-y-5 shadow-2xl relative">
             <button onClick={() => setActiveModal(null)} className="absolute top-5 right-5 text-slate-400 hover:text-white font-bold">✕</button>
-            
+
             {activeModal === 'teach' && (
               <form onSubmit={handleApplyTeach} className="space-y-4 text-xs">
                 <h3 className="text-base font-bold text-white">Apply to Teach with QTEI</h3>
@@ -432,7 +483,7 @@ export default function App() {
               <p className="text-sm text-slate-300 leading-relaxed">
                 Welcome to the official Learning Management and Cohort Operations System for the QueerTech Empowerment Initiative (QTEI). Manage courses, coordinate instructors, and empower students securely in one unified hub.
               </p>
-              
+
               <div className="grid grid-cols-3 gap-4 pt-6 border-t border-slate-800/80 max-w-xl mx-auto text-center">
                 <div>
                   <p className="text-xl font-bold text-indigo-400">{courses.length}</p>
