@@ -10,15 +10,11 @@ export default function App() {
   const [students, setStudents] = useState([]);
   const [timetableRequests, setTimetableRequests] = useState([]);
 
-  // Navigation States
-  const [adminView, setAdminView] = useState('hub'); // 'hub', 'course', 'tutor', 'student', 'directory'
+  const [adminView, setAdminView] = useState('hub');
   const [authView, setAuthView] = useState('select');
-
-  // Sidebar & Modal States
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
 
-  // Form States for Public Submissions
   const [teachName, setTeachName] = useState('');
   const [teachEmail, setTeachEmail] = useState('');
   const [teachExpertise, setTeachExpertise] = useState('');
@@ -33,7 +29,6 @@ export default function App() {
   const [reqDesc, setReqDesc] = useState('');
   const [reqBy, setReqBy] = useState('');
 
-  // Admin Application Review Queues
   const [teacherApps, setTeacherApps] = useState([]);
   const [studentApps, setStudentApps] = useState([]);
   const [courseReqs, setCourseReqs] = useState([]);
@@ -116,7 +111,7 @@ export default function App() {
         body: JSON.stringify({ name: teachName, email: teachEmail, expertise: teachExpertise, bio: teachBio })
       });
       if (res.ok) {
-        setSuccessMsg('✅ Application submitted successfully! Admin will review your credentials.');
+        setSuccessMsg('✅ Application submitted! Admin will review your credentials.');
         setActiveModal(null);
         setTeachName('');
         setTeachEmail('');
@@ -137,7 +132,7 @@ export default function App() {
         body: JSON.stringify({ name: learnName, email: learnEmail, track: learnTrack, motivation: learnMotivation })
       });
       if (res.ok) {
-        setSuccessMsg('✅ Learning application submitted successfully! We will be in touch soon.');
+        setSuccessMsg('✅ Learning application submitted! We will be in touch soon.');
         setActiveModal(null);
         setLearnName('');
         setLearnEmail('');
@@ -276,18 +271,16 @@ export default function App() {
       });
       const data = await res.json();
       if (res.ok) {
-        setSuccessMsg(
-          `✅ Tutor "${data.name}" assigned to ${data.course_name}! Code: ${data.tempCode} (${data.emailSent ? 'Welcome email sent' : 'Email skipped/queued'})`
-        );
+        setSuccessMsg(`✅ Tutor "${data.name}" assigned to ${data.course_name}! Code: ${data.tempCode}`);
         setNewTutorName('');
         setNewTutorEmail('');
         await fetchAllData();
         setAdminView('hub');
       } else {
-        setErrorMsg(`❌ Error: ${data.error || 'Could not assign tutor. Check if email already exists.'}`);
+        setErrorMsg(`❌ Error: ${data.error || 'Could not assign tutor.'}`);
       }
     } catch (err) {
-      setErrorMsg('❌ Network error: Backend may be waking up. Please try again in 30 seconds.');
+      setErrorMsg('❌ Network error connecting to backend.');
     } finally {
       setLoadingMsg('');
     }
@@ -314,24 +307,21 @@ export default function App() {
       });
       const data = await res.json();
       if (res.ok) {
-        setSuccessMsg(
-          `✅ Student "${data.name}" admitted to ${data.course_name}! Access Code: ${data.code} (${data.emailSent ? 'Confirmation email sent' : 'Save code manually'})`
-        );
+        setSuccessMsg(`✅ Student "${data.name}" admitted to ${data.course_name}! Access Code: ${data.code}`);
         setNewStudentName('');
         setNewStudentEmail('');
         await fetchAllData();
         setAdminView('hub');
       } else {
-        setErrorMsg(`❌ Error: ${data.error || 'Could not admit student. Email may already be registered.'}`);
+        setErrorMsg(`❌ Error: ${data.error || 'Could not admit student.'}`);
       }
     } catch (err) {
-      setErrorMsg('❌ Network error connecting to backend server.');
+      setErrorMsg('❌ Network error connecting to backend.');
     } finally {
       setLoadingMsg('');
     }
   };
 
-  // Delete / Archive Handlers (Ready for when you want to enable delete buttons)
   const handleDeleteRecord = async (type, id, label) => {
     if (!window.confirm(`Are you sure you want to remove ${label}?`)) return;
     try {
@@ -397,7 +387,6 @@ export default function App() {
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} p-6 transition-colors duration-300 font-sans relative`}>
-      {/* Header Bar */}
       <header className="flex justify-between items-center max-w-6xl mx-auto border-b border-slate-800 pb-4 mb-6">
         <div className="flex items-center gap-4">
           <button
@@ -428,7 +417,6 @@ export default function App() {
         </div>
       </header>
 
-      {/* Contextual Sidebar Drawer */}
       {isSidebarOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
           <div className="w-80 bg-slate-900 border-l border-slate-800 p-6 space-y-6 shadow-2xl flex flex-col justify-between">
@@ -459,7 +447,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Application Modals */}
       {activeModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-8 rounded-3xl space-y-5 shadow-2xl relative">
@@ -470,9 +457,9 @@ export default function App() {
                 <h3 className="text-base font-bold text-white">Apply to Teach with QTEI</h3>
                 <input type="text" value={teachName} onChange={e => setTeachName(e.target.value)} placeholder="Full Name" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white" required />
                 <input type="email" value={teachEmail} onChange={e => setTeachEmail(e.target.value)} placeholder="Email Address" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white" required />
-                <input type="text" value={teachExpertise} onChange={e => setTeachExpertise(e.target.value)} placeholder="Area of Tech Expertise (e.g. Python, UI/UX)" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white" required />
-                <textarea value={teachBio} onChange={e => setTeachBio(e.target.value)} placeholder="Short Bio & Experience Links" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white h-20 resize-none" />
-                <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition-all">Submit Application</button>
+                <input type="text" value={teachExpertise} onChange={e => setTeachExpertise(e.target.value)} placeholder="Area of Tech Expertise" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white" required />
+                <textarea value={teachBio} onChange={e => setTeachBio(e.target.value)} placeholder="Short Bio & Links" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white h-20 resize-none" />
+                <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl">Submit Application</button>
               </form>
             )}
 
@@ -481,9 +468,9 @@ export default function App() {
                 <h3 className="text-base font-bold text-white">Apply to Learn in Our Cohort</h3>
                 <input type="text" value={learnName} onChange={e => setLearnName(e.target.value)} placeholder="Full Name" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white" required />
                 <input type="email" value={learnEmail} onChange={e => setLearnEmail(e.target.value)} placeholder="Email Address" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white" required />
-                <input type="text" value={learnTrack} onChange={e => setLearnTrack(e.target.value)} placeholder="Desired Track (e.g. Full-Stack, Cybersecurity)" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white" required />
-                <textarea value={learnMotivation} onChange={e => setLearnMotivation(e.target.value)} placeholder="Why do you want to join this cohort?" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white h-20 resize-none" />
-                <button type="submit" className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 rounded-xl transition-all">Submit Learner Application</button>
+                <input type="text" value={learnTrack} onChange={e => setLearnTrack(e.target.value)} placeholder="Desired Track" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white" required />
+                <textarea value={learnMotivation} onChange={e => setLearnMotivation(e.target.value)} placeholder="Why do you want to join?" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white h-20 resize-none" />
+                <button type="submit" className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 rounded-xl">Submit Learner Application</button>
               </form>
             )}
 
@@ -491,9 +478,9 @@ export default function App() {
               <form onSubmit={handleRequestCourse} className="space-y-4 text-xs">
                 <h3 className="text-base font-bold text-white">Request a New Course</h3>
                 <input type="text" value={reqTitle} onChange={e => setReqTitle(e.target.value)} placeholder="Course Title" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white" required />
-                <textarea value={reqDesc} onChange={e => setReqDesc(e.target.value)} placeholder="Course Description & Why it's needed" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white h-20 resize-none" required />
-                <input type="text" value={reqBy} onChange={e => setReqBy(e.target.value)} placeholder="Your Name or Community Group" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white" />
-                <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition-all">Submit Course Request</button>
+                <textarea value={reqDesc} onChange={e => setReqDesc(e.target.value)} placeholder="Course Description" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white h-20 resize-none" required />
+                <input type="text" value={reqBy} onChange={e => setReqBy(e.target.value)} placeholder="Your Name" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white" />
+                <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl">Submit Course Request</button>
               </form>
             )}
 
@@ -501,7 +488,6 @@ export default function App() {
               <div className="space-y-4 text-xs text-slate-300">
                 <h3 className="text-base font-bold text-white">About QTEI</h3>
                 <p>The QueerTech Empowerment Initiative (QTEI) is a Minority Watch Organisation program focused on bridging the digital divide for marginalized tech leaders across Africa.</p>
-                <p className="font-semibold text-white">Support & Inquiries:</p>
                 <p className="font-mono text-indigo-400">sandranuwaks@gmail.com</p>
                 <button onClick={() => setActiveModal(null)} className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl">Close</button>
               </div>
@@ -527,7 +513,6 @@ export default function App() {
               <p className="text-sm text-slate-300 leading-relaxed">
                 Welcome to the official Learning Management and Cohort Operations System for the QueerTech Empowerment Initiative (QTEI). Manage courses, coordinate instructors, and empower students securely in one unified hub.
               </p>
-
               <div className="grid grid-cols-3 gap-4 pt-6 border-t border-slate-800/80 max-w-xl mx-auto text-center">
                 <div>
                   <p className="text-xl font-bold text-indigo-400">{courses.length}</p>
@@ -573,7 +558,7 @@ export default function App() {
                 <h3 className="text-lg font-bold text-white">Instructor Sign-In</h3>
                 <form onSubmit={(e) => handleRequestMagicLink(e, 'tutor')} className="space-y-3 text-xs">
                   <input type="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} placeholder="tutor@example.com" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white" required />
-                  <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl transition-all">Send Magic Link</button>
+                  <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl">Send Magic Link</button>
                 </form>
               </div>
             )}
@@ -584,14 +569,13 @@ export default function App() {
                 <h3 className="text-lg font-bold text-white">Student Sign-In</h3>
                 <form onSubmit={handleStudentCodeLogin} className="space-y-3 text-xs">
                   <input type="text" value={loginCode} onChange={e => setLoginCode(e.target.value)} placeholder="e.g. QTEI-48291" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white uppercase font-mono" required />
-                  <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition-all">Login with Code</button>
+                  <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl">Login with Code</button>
                 </form>
               </div>
             )}
           </div>
         )}
 
-        {/* ================= ADMIN DASHBOARD HUB ================= */}
         {user && user.role === 'admin' && (
           <div className="space-y-8">
             <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl flex justify-between items-center shadow-xl">
@@ -627,17 +611,14 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* Review Queues for Applications */}
                 {teacherApps.length > 0 && (
                   <div className="bg-indigo-950/40 border border-indigo-600/50 p-6 rounded-3xl space-y-3">
                     <h3 className="text-sm font-bold text-indigo-300">Pending Teacher Applications ({teacherApps.length})</h3>
                     {teacherApps.map(app => (
-                      <div key={app.id} className="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-xs flex justify-between items-center">
-                        <div>
-                          <p className="font-bold text-white">{app.name} ({app.email})</p>
-                          <p className="text-indigo-400">Expertise: {app.expertise}</p>
-                          <p className="text-slate-300">Bio: {app.bio}</p>
-                        </div>
+                      <div key={app.id} className="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-xs">
+                        <p className="font-bold text-white">{app.name} ({app.email})</p>
+                        <p className="text-indigo-400">Expertise: {app.expertise}</p>
+                        <p className="text-slate-300">Bio: {app.bio}</p>
                       </div>
                     ))}
                   </div>
@@ -673,12 +654,10 @@ export default function App() {
               </div>
             )}
 
-            {/* VIEW DIRECTORY (COURSES, TUTORS & STUDENTS) */}
             {adminView === 'directory' && (
               <div className="space-y-6">
                 <button onClick={() => setAdminView('hub')} className="text-xs font-bold text-indigo-400 hover:underline">← Back to Hub</button>
 
-                {/* Courses List */}
                 <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
                   <h3 className="text-sm font-bold text-white">📚 Active Courses ({courses.length})</h3>
                   {courses.length === 0 ? (
@@ -691,15 +670,12 @@ export default function App() {
                             <p className="font-bold text-white">{c.name} <span className="font-mono text-indigo-400">({c.code})</span></p>
                             <p className="text-slate-400">{c.timetable}</p>
                           </div>
-                          {/* Delete button kept hidden for now; uncomment when ready to enable archiving/deleting */}
-                          {/* <button onClick={() => handleDeleteRecord('courses', c.id, c.name)} className="text-rose-400 hover:underline">Delete</button> */}
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
 
-                {/* Tutors List */}
                 <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
                   <h3 className="text-sm font-bold text-white">👨‍🏫 Assigned Tutors ({tutors.length})</h3>
                   {tutors.length === 0 ? (
@@ -713,14 +689,12 @@ export default function App() {
                             <p className="text-slate-400">{t.email}</p>
                             <p className="text-indigo-300">Course: {t.course_name || 'Unassigned'}</p>
                           </div>
-                          {/* <button onClick={() => handleDeleteRecord('tutors', t.id, t.name)} className="text-rose-400 hover:underline">Delete</button> */}
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
 
-                {/* Students List */}
                 <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
                   <h3 className="text-sm font-bold text-white">🎓 Admitted Students ({students.length})</h3>
                   {students.length === 0 ? (
@@ -734,7 +708,6 @@ export default function App() {
                             <p className="text-slate-400">{s.email}</p>
                             <p className="text-indigo-300">Course: {s.course_name || 'Unassigned'}</p>
                           </div>
-                          {/* <button onClick={() => handleDeleteRecord('students', s.id, s.name)} className="text-rose-400 hover:underline">Delete</button> */}
                         </div>
                       ))}
                     </div>
@@ -787,7 +760,6 @@ export default function App() {
           </div>
         )}
 
-        {/* ================= TUTOR DASHBOARD ================= */}
         {user && user.role === 'tutor' && (
           <div className="bg-slate-900 border border-slate-800 p-8 rounded-3xl space-y-6 shadow-xl max-w-3xl mx-auto">
             <h2 className="text-lg font-bold text-white">Instructor Dashboard</h2>
@@ -804,7 +776,6 @@ export default function App() {
           </div>
         )}
 
-        {/* ================= STUDENT DASHBOARD ================= */}
         {user && user.role === 'student' && (
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="bg-slate-900 border border-slate-800 p-8 rounded-3xl space-y-6 shadow-xl">
