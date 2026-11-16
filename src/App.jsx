@@ -218,16 +218,44 @@ export default function App() {
 
   const handleCreateTutor = async (e) => {
     e.preventDefault();
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    if (!newTutorCourseId) {
+      setErrorMsg('Please create a course first or select a valid course.');
+      return;
+    }
+
+    setLoadingMsg('Assigning tutor and dispatching welcome link...');
     try {
       const res = await fetch(`${BACKEND_URL}/api/tutors`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newTutorName, email: newTutorEmail, courseId: newTutorCourseId })
+        body: JSON.stringify({
+          name: newTutorName.trim(),
+          email: newTutorEmail.trim().toLowerCase(),
+          courseId: Number(newTutorCourseId)
+        })
       });
-      if (res.ok) { setSuccessMsg('✅ Tutor assigned successfully!'); setNewTutorName(''); setNewTutorEmail(''); fetchAllData(); }
-    } catch (err) { setErrorMsg('Failed.'); }
-  };
 
+      const data = await res.json();
+
+      if (res.ok) {
+        setSuccessMsg(`✅ Tutor "${data.name}" assigned to ${data.course_name}! Access Code: ${data.tempCode}`);
+        setNewTutorName('');
+        setNewTutorEmail('');
+        await fetchAllData();
+        setAdminView('hub'); // Automatically return to Admin Hub on success
+      } else {
+        setErrorMsg(`❌ Error: ${data.error || 'Could not assign tutor. Check if email already exists.'}`);
+      }
+    } catch (err) {
+      setErrorMsg(`❌ Network error: Backend may be waking up from sleep. Please wait 30 seconds and try again.`);
+    } finally {
+      setLoadingMsg('');
+    }
+  };
+  
   const handleCreateStudent = async (e) => {
     e.preventDefault();
     try {
