@@ -282,23 +282,30 @@ export default function App() {
       
       {/* Header Bar */}
       <header className="flex justify-between items-center max-w-6xl mx-auto border-b border-slate-800 pb-4 mb-6">
-        <div className="cursor-pointer" onClick={() => { setUser(null); setAuthView('select'); setAdminView('hub'); }}>
-          <h1 className="text-xl font-black bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
-            QTEI LMS Portal
-          </h1>
-          <p className="text-xs text-slate-400">QueerTech Empowerment Initiative &bull; Minority Watch Organisation</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button onClick={() => setIsDarkMode(!isDarkMode)} className="text-xs font-bold px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700">
-            {isDarkMode ? '☀️ Light' : '🌙 Dark'}
-          </button>
-          {user && (
-            <button onClick={() => { setUser(null); setAuthView('select'); setAdminView('hub'); }} className="text-xs font-bold px-4 py-1.5 rounded-xl bg-rose-600 text-white hover:bg-rose-500 shadow-md">
-              🚪 Sign Out
-            </button>
-          )}
-        </div>
-      </header>
+  <div className="flex items-center gap-4">
+    <button 
+      onClick={() => { setUser(null); setAuthView('select'); setAdminView('hub'); }} 
+      className="text-xs font-bold px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1 shadow-md transition-all">
+      🏠 Home
+    </button>
+    <div className="cursor-pointer" onClick={() => { setUser(null); setAuthView('select'); setAdminView('hub'); }}>
+      <h1 className="text-xl font-black bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+        QTEI LMS Portal
+      </h1>
+      <p className="text-xs text-slate-400">QueerTech Empowerment Initiative &bull; Minority Watch Organisation</p>
+    </div>
+  </div>
+  <div className="flex items-center gap-3">
+    <button onClick={() => setIsDarkMode(!isDarkMode)} className="text-xs font-bold px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700">
+      {isDarkMode ? '☀️ Light' : '🌙 Dark'}
+    </button>
+    {user && (
+      <button onClick={() => { setUser(null); setAuthView('select'); setAdminView('hub'); }} className="text-xs font-bold px-4 py-1.5 rounded-xl bg-rose-600 text-white hover:bg-rose-500 shadow-md">
+        🚪 Sign Out
+      </button>
+    )}
+  </div>
+</header>
 
       {loadingMsg && <div className="max-w-6xl mx-auto mb-4 bg-cyan-950/80 border border-cyan-500 text-cyan-200 px-4 py-2 rounded-xl text-xs">{loadingMsg}</div>}
       {errorMsg && <div className="max-w-6xl mx-auto mb-4 bg-rose-950/80 border border-rose-500 text-rose-200 px-4 py-2 rounded-xl text-xs flex justify-between"><span>{errorMsg}</span><button onClick={() => setErrorMsg('')}>✕</button></div>}
