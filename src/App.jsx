@@ -11,12 +11,12 @@ export default function App() {
   const [timetableRequests, setTimetableRequests] = useState([]);
 
   // Navigation States
-  const [adminView, setAdminView] = useState('hub');
+  const [adminView, setAdminView] = useState('hub'); // 'hub', 'course', 'tutor', 'student', 'directory'
   const [authView, setAuthView] = useState('select');
 
   // Sidebar & Modal States
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeModal, setActiveModal] = useState(null); // 'teach', 'learn', 'request-course', 'info'
+  const [activeModal, setActiveModal] = useState(null);
 
   // Form States for Public Submissions
   const [teachName, setTeachName] = useState('');
@@ -230,6 +230,9 @@ export default function App() {
 
   const handleCreateCourse = async (e) => {
     e.preventDefault();
+    setErrorMsg('');
+    setSuccessMsg('');
+    setLoadingMsg('Creating course...');
     try {
       const res = await fetch(`${BACKEND_URL}/api/courses`, {
         method: 'POST',
@@ -238,13 +241,17 @@ export default function App() {
       });
       const data = await res.json();
       if (res.ok) {
-        setCourses([...courses, data]);
-        setSuccessMsg(`✅ Course "${data.name}" created!`);
+        setSuccessMsg(`✅ Course "${data.name}" (${data.code}) created successfully!`);
         setNewCourseName('');
-        fetchAllData();
+        await fetchAllData();
+        setAdminView('hub');
+      } else {
+        setErrorMsg(`❌ Error: ${data.error || 'Could not create course.'}`);
       }
     } catch (err) {
-      setErrorMsg('Failed.');
+      setErrorMsg('❌ Network error connecting to backend.');
+    } finally {
+      setLoadingMsg('');
     }
   };
 
@@ -269,7 +276,9 @@ export default function App() {
       });
       const data = await res.json();
       if (res.ok) {
-        setSuccessMsg(`✅ Tutor "${data.name}" assigned to ${data.course_name}! Access Code: ${data.tempCode}`);
+        setSuccessMsg(
+          `✅ Tutor "${data.name}" assigned to ${data.course_name}! Code: ${data.tempCode} (${data.emailSent ? 'Welcome email sent' : 'Email skipped/queued'})`
+        );
         setNewTutorName('');
         setNewTutorEmail('');
         await fetchAllData();
@@ -278,7 +287,7 @@ export default function App() {
         setErrorMsg(`❌ Error: ${data.error || 'Could not assign tutor. Check if email already exists.'}`);
       }
     } catch (err) {
-      setErrorMsg('❌ Network error: Backend may be waking up from sleep. Please wait 30 seconds and try again.');
+      setErrorMsg('❌ Network error: Backend may be waking up. Please try again in 30 seconds.');
     } finally {
       setLoadingMsg('');
     }
@@ -286,20 +295,55 @@ export default function App() {
 
   const handleCreateStudent = async (e) => {
     e.preventDefault();
+    setErrorMsg('');
+    setSuccessMsg('');
+    if (!newStudentCourseId) {
+      setErrorMsg('Please create a course first or select a valid course.');
+      return;
+    }
+    setLoadingMsg('Admitting student and generating access code...');
     try {
       const res = await fetch(`${BACKEND_URL}/api/students`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newStudentName, email: newStudentEmail, courseId: Number(newStudentCourseId) })
+        body: JSON.stringify({
+          name: newStudentName.trim(),
+          email: newStudentEmail.trim().toLowerCase(),
+          courseId: Number(newStudentCourseId)
+        })
       });
+      const data = await res.json();
       if (res.ok) {
-        setSuccessMsg('✅ Student admitted successfully!');
+        setSuccessMsg(
+          `✅ Student "${data.name}" admitted to ${data.course_name}! Access Code: ${data.code} (${data.emailSent ? 'Confirmation email sent' : 'Save code manually'})`
+        );
         setNewStudentName('');
         setNewStudentEmail('');
-        fetchAllData();
+        await fetchAllData();
+        setAdminView('hub');
+      } else {
+        setErrorMsg(`❌ Error: ${data.error || 'Could not admit student. Email may already be registered.'}`);
       }
     } catch (err) {
-      setErrorMsg('Failed.');
+      setErrorMsg('❌ Network error connecting to backend server.');
+    } finally {
+      setLoadingMsg('');
+    }
+  };
+
+  // Delete / Archive Handlers (Ready for when you want to enable delete buttons)
+  const handleDeleteRecord = async (type, id, label) => {
+    if (!window.confirm(`Are you sure you want to remove ${label}?`)) return;
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/${type}/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setSuccessMsg(`🗑️ Removed ${label}.`);
+        await fetchAllData();
+      } else {
+        setErrorMsg(`Failed to delete ${label}.`);
+      }
+    } catch (err) {
+      setErrorMsg('Network error while deleting.');
     }
   };
 
@@ -560,21 +604,26 @@ export default function App() {
 
             {adminView === 'hub' && (
               <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <button onClick={() => setAdminView('course')} className="bg-slate-900 border border-slate-800 hover:border-indigo-500 p-6 rounded-3xl text-left space-y-2 shadow-xl transition-all group">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <button onClick={() => setAdminView('course')} className="bg-slate-900 border border-slate-800 hover:border-indigo-500 p-6 rounded-3xl text-left space-y-2 shadow-xl transition-all">
                     <span className="text-2xl">📚</span>
                     <h3 className="text-sm font-bold text-white">Create Course</h3>
-                    <p className="text-xs text-slate-400">Establish new courses and auto-generate codes.</p>
+                    <p className="text-xs text-slate-400">Establish new courses and codes.</p>
                   </button>
-                  <button onClick={() => setAdminView('tutor')} className="bg-slate-900 border border-slate-800 hover:border-indigo-500 p-6 rounded-3xl text-left space-y-2 shadow-xl transition-all group">
+                  <button onClick={() => setAdminView('tutor')} className="bg-slate-900 border border-slate-800 hover:border-indigo-500 p-6 rounded-3xl text-left space-y-2 shadow-xl transition-all">
                     <span className="text-2xl">👨‍🏫</span>
                     <h3 className="text-sm font-bold text-white">Assign Tutors</h3>
                     <p className="text-xs text-slate-400">Add instructors and assign courses.</p>
                   </button>
-                  <button onClick={() => setAdminView('student')} className="bg-slate-900 border border-slate-800 hover:border-indigo-500 p-6 rounded-3xl text-left space-y-2 shadow-xl transition-all group">
+                  <button onClick={() => setAdminView('student')} className="bg-slate-900 border border-slate-800 hover:border-indigo-500 p-6 rounded-3xl text-left space-y-2 shadow-xl transition-all">
                     <span className="text-2xl">🎓</span>
                     <h3 className="text-sm font-bold text-white">Admit Students</h3>
                     <p className="text-xs text-slate-400">Admit students into cohorts.</p>
+                  </button>
+                  <button onClick={() => setAdminView('directory')} className="bg-slate-900 border border-indigo-700/60 hover:border-indigo-400 p-6 rounded-3xl text-left space-y-2 shadow-xl transition-all">
+                    <span className="text-2xl">📋</span>
+                    <h3 className="text-sm font-bold text-indigo-300">View Directory</h3>
+                    <p className="text-xs text-slate-400">View all courses ({courses.length}), tutors ({tutors.length}) & students ({students.length}).</p>
                   </button>
                 </div>
 
@@ -594,6 +643,19 @@ export default function App() {
                   </div>
                 )}
 
+                {studentApps.length > 0 && (
+                  <div className="bg-cyan-950/40 border border-cyan-600/50 p-6 rounded-3xl space-y-3">
+                    <h3 className="text-sm font-bold text-cyan-300">Pending Student Applications ({studentApps.length})</h3>
+                    {studentApps.map(app => (
+                      <div key={app.id} className="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-xs">
+                        <p className="font-bold text-white">{app.name} ({app.email})</p>
+                        <p className="text-cyan-400">Track: {app.track}</p>
+                        <p className="text-slate-300">Motivation: {app.motivation}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 {timetableRequests.length > 0 && (
                   <div className="bg-amber-950/40 border border-amber-600/50 p-6 rounded-3xl space-y-4">
                     <h3 className="text-sm font-bold text-amber-300">Tutor Timetable Sign-Off Requests ({timetableRequests.length})</h3>
@@ -608,6 +670,76 @@ export default function App() {
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* VIEW DIRECTORY (COURSES, TUTORS & STUDENTS) */}
+            {adminView === 'directory' && (
+              <div className="space-y-6">
+                <button onClick={() => setAdminView('hub')} className="text-xs font-bold text-indigo-400 hover:underline">← Back to Hub</button>
+
+                {/* Courses List */}
+                <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
+                  <h3 className="text-sm font-bold text-white">📚 Active Courses ({courses.length})</h3>
+                  {courses.length === 0 ? (
+                    <p className="text-xs text-slate-400">No courses created yet.</p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                      {courses.map(c => (
+                        <div key={c.id} className="bg-slate-950 border border-slate-800 p-4 rounded-2xl flex justify-between items-center">
+                          <div>
+                            <p className="font-bold text-white">{c.name} <span className="font-mono text-indigo-400">({c.code})</span></p>
+                            <p className="text-slate-400">{c.timetable}</p>
+                          </div>
+                          {/* Delete button kept hidden for now; uncomment when ready to enable archiving/deleting */}
+                          {/* <button onClick={() => handleDeleteRecord('courses', c.id, c.name)} className="text-rose-400 hover:underline">Delete</button> */}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Tutors List */}
+                <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
+                  <h3 className="text-sm font-bold text-white">👨‍🏫 Assigned Tutors ({tutors.length})</h3>
+                  {tutors.length === 0 ? (
+                    <p className="text-xs text-slate-400">No tutors assigned yet.</p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                      {tutors.map(t => (
+                        <div key={t.id} className="bg-slate-950 border border-slate-800 p-4 rounded-2xl flex justify-between items-center">
+                          <div>
+                            <p className="font-bold text-white">{t.name} <span className="font-mono text-emerald-400">({t.code})</span></p>
+                            <p className="text-slate-400">{t.email}</p>
+                            <p className="text-indigo-300">Course: {t.course_name || 'Unassigned'}</p>
+                          </div>
+                          {/* <button onClick={() => handleDeleteRecord('tutors', t.id, t.name)} className="text-rose-400 hover:underline">Delete</button> */}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Students List */}
+                <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
+                  <h3 className="text-sm font-bold text-white">🎓 Admitted Students ({students.length})</h3>
+                  {students.length === 0 ? (
+                    <p className="text-xs text-slate-400">No students admitted yet.</p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                      {students.map(s => (
+                        <div key={s.id} className="bg-slate-950 border border-slate-800 p-4 rounded-2xl flex justify-between items-center">
+                          <div>
+                            <p className="font-bold text-white">{s.name} <span className="font-mono text-cyan-400">({s.code})</span></p>
+                            <p className="text-slate-400">{s.email}</p>
+                            <p className="text-indigo-300">Course: {s.course_name || 'Unassigned'}</p>
+                          </div>
+                          {/* <button onClick={() => handleDeleteRecord('students', s.id, s.name)} className="text-rose-400 hover:underline">Delete</button> */}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
